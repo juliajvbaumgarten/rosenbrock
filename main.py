@@ -1,3 +1,5 @@
+# Author: Lauren Sdun, Julia Jones, Julia Baumgarten
+
 import numpy as np
 from dataclasses import dataclass
 from typing import Callable, Tuple, Dict, Any
