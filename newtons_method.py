@@ -15,3 +15,5 @@ def hessian_rosenbrock_2d(x):
     H[1, 0] = -400 * x[0] # d^2f/dydx
     H[1, 1] = 200 # d^2f/dy^2
     return H
+
+# calculate the minimum
