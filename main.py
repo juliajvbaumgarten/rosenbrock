@@ -3,8 +3,10 @@ from dataclasses import dataclass
 from typing import Callable, Tuple, Dict, Any
 from numpy.linalg import norm
 from scipy.optimize import minimize
-import rosenbrockfct as rosen
 
+def rosen(xy: np.ndarray) -> float:
+    x, y = xy
+    return (1 - x)**2 + 100.0 * (y - x**2)**2
 
 # Configuration
 
