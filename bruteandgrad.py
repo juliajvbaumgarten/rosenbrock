@@ -2,17 +2,38 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import rosen
 
-x = np.arange(-2, 2, .01)
-y = np.arange(-1, 3, .01)
-X, Y = np.meshgrid(x, y)
-Z = rosen((X, Y))
-
-min_index = np.unravel_index(np.argmin(Z), Z.shape)
-x_min_brute = X[min_index]
-y_min_brute = Y[min_index]
-z_min_brute = Z[min_index]
-
 print(f"Brute-force minimum approx: x={x_min_brute:.4f}, y={y_min_brute:.4f}, f={z_min_brute:.6f}")
+
+class Result:
+    def __init__(self, method, x0, x, f, iters, success, info):
+        self.method = method
+        self.x0 = x0
+        self.x = x
+        self.f = f
+        self.iters = iters
+        self.success = success
+        self.info = info
+
+
+# Brute force method 
+def brute_force(xrange=(-2,2), yrange=(-1,3), step=0.01):
+    x = np.arange(xrange[0], xrange[1], step)
+    y = np.arange(yrange[0], yrange[1], step)
+    X, Y = np.meshgrid(x, y)
+    Z = rosen((X, Y))
+    min_index = np.unravel_index(np.argmin(Z), Z.shape)
+    x_min = X[min_index]
+    y_min = Y[min_index]
+    f_min = float(Z[min_index])
+    return Result(
+        method="brute_force",
+        x0=np.array([np.nan, np.nan]),
+        x=np.array([x_min, y_min]),
+        f=f_min,
+        iters=0,
+        success=(f_min <= 1e-10),
+        info={"grid_x": x, "grid_y": y, "z": Z}
+    )
 
 #Gradient Descent 
 def rosen_grad(x, y):
@@ -32,16 +53,4 @@ def gradient_descent(start, lr=0.001, tol=1e-6, max_iter=100000):
             break
         x, y = x_new, y_new
     return x, y, rosen((x, y))
-start_point = (-1.5, 2.0)
-x_min_gd, y_min_gd, z_min_gd = gradient_descent(start_point, lr=0.001)
 
-plt.figure(figsize=(7,5))
-plt.pcolormesh(X, Y, Z, shading='auto', norm='log', vmin=1e-3)
-plt.plot(x_min_brute, y_min_brute, 'ro', label='Brute-force min')
-plt.plot(x_min_gd, y_min_gd, 'go', label='Gradient descent min')
-plt.xlabel("x")
-plt.ylabel("y")
-plt.title("Rosenbrock Function Minima")
-plt.legend()
-plt.colorbar(label="f(x, y)")
-plt.show()
