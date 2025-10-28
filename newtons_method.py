@@ -1,35 +1,24 @@
 import numpy as np
 from scipy.optimize import minimize
-from function import rosenbrock_2d
+from common import Result, rosen, rosen_grad, rosen_hess
 
-# to find the minima of the 2d rosenbrock function using Newton's method, we need 
-# to calculate the gradient and the hessian. 
+def newton_method(x0, max_iter=1000, tol=1e-10):
 
-# choosing an initial point
-initial_guess = np.array([-1.2, 1])
+    res = minimize(
+        rosen,
+        x0,
+        method='Newton-CG',
+        jac=rosen_grad,
+        hess=rosen_hess,
+        options={'maxiter': max_iter, 'xtol': tol, 'disp': False}
+    )
 
-# calculating the gradient of the 2d rosenbrock function
-def grad_rosenbrock_2d(x):
-    df_dx = -2 * (1 - x[0]) - 400 * x[0] * (x[1] - x[0]**2)
-    df_dy = 200 * (x[1] - x[0]**2)
-    return np.array([df_dx, df_dy])
-
-# calculating the hessian (2x2 matrix of 2nd derivatives)
-def hessian_rosenbrock_2d(x):
-    H = np.zeros((2, 2)) # create an empty 2x2 matrix
-    H[0, 0] = 2 - 400 * x[1] + 1200 * x[0]**2 # d^2f/dx^2
-    H[0, 1] = -400 * x[0] # d^2f/dxdy
-    H[1, 0] = -400 * x[0] # d^2f/dydx
-    H[1, 1] = 200 # d^2f/dy^2
-    return H
-
-# calculate the minimum
-result_newton_cg = minimize(
-    rosenbrock_2d,
-    initial_guess,
-    method='Newton-CG',
-    jac=grad_rosenbrock_2d,
-    hess=hessian_rosenbrock_2d
-)
-
-print(f"Minimum function value: {result_newton_cg.fun}")
+    return Result(
+        method="newton",
+        x0=np.array(x0, dtype=float),
+        x=res.x,
+        f=float(res.fun),
+        iters=int(res.nit),
+        success=bool(res.fun <= tol),
+        info={"message": res.message, "path": [res.x]}
+    )
