@@ -2,6 +2,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import rosen
 
+x = np.arange(-2, 2, .01) 
+y = np.arange(-1, 3, .01) 
+X, Y = np.meshgrid(x, y) 
+Z = rosen((X, Y)) 
+
+min_index = np.unravel_index(np.argmin(Z), Z.shape) 
+x_min_brute = X[min_index] 
+y_min_brute = Y[min_index] 
+z_min_brute = Z[min_index] 
+
+print(f"Brute-force minimum approx: x={x_min_brute:.4f}, y={y_min_brute:.4f}, f={z_min_brute:.6f}")
+
 class Result:
     def __init__(self, method, x0, x, f, iters, success, info):
         self.method = method
@@ -50,5 +62,22 @@ def gradient_descent(start, lr=0.001, tol=1e-6, max_iter=100000):
             print(f"Converged after {i} iterations.")
             break
         x, y = x_new, y_new
-    return x, y, rosen((x, y))
+    return Result(
+    method="gradient_descent",
+    x0=np.array(start),
+    x=np.array([x, y]),
+    f=float(rosen((x, y))),
+    iters=i,
+    success=(rosen((x, y)) < 1e-10),
+    info={"lr": lr, "tol": tol}
+)
 
+plt.figure(figsize=(7,5)) 
+plt.pcolormesh(x, y, Z, shading='auto', norm='log', vmin=1e-3) 
+plt.plot(x_min_brute, y_min_brute, 'ro', label='Brute-force min') 
+plt.xlabel("x") 
+plt.ylabel("y") 
+plt.title("Rosenbrock Function Minima") 
+plt.legend() 
+plt.colorbar(label="f(x, y)") 
+plt.show()
