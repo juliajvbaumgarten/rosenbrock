@@ -2,13 +2,23 @@
 
 import numpy as np
 from dataclasses import dataclass
-from typing import Callable, Tuple, Dict, Any
+from typing import Callable, Tuple, Dict, Any, List
 from numpy.linalg import norm
 from scipy.optimize import minimize
 
 from nelder_mead import *
 from newtons_method import * 
 from bruteandgrad import *
+
+@dataclass
+class Result:
+    method: str
+    x0: np.ndarray          # starting point (shape (2,))
+    x: np.ndarray           # final point (shape (2,))
+    f: float                # final function value
+    iters: int              # iterations performed
+    success: bool           # did we hit
+    info: Dict[str, Any]    
 
 def rosen(xy: np.ndarray) -> float:
     x, y = xy
@@ -18,16 +28,6 @@ def rosen(xy: np.ndarray) -> float:
 
 X_RANGE = (-2.0, 2.0)
 Y_RANGE = (-1.0, 3.0)
-
-@dataclass
-class Result:
-    method: str
-    x0: np.ndarray
-    x: np.ndarray
-    f: float
-    iters: int
-    success: bool
-    info: Dict[str, Any]
 
 def random_starts(n: int, seed: int = 0):
     rng = np.random.default_rng(seed)
