@@ -7,10 +7,10 @@ from typing import Callable, Tuple, Dict, Any, List
 from numpy.linalg import norm
 from scipy.optimize import minimize
 
-from bruteandgrad import *
-from newtons_method import *
-from nelder_mead import *
-from main import Result, rosen
+from common import Result, rosen
+from bruteandgrad import brute_force, gradient_descent
+from newtons_method import newton_method
+from nelder_mead import nelder_mead
 
 # Configuration
 def run_all(corners: List[Tuple[float,float]] = [(-2,-1), (-2,3), (2,-1), (2,3)],
