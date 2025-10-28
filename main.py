@@ -1,14 +1,16 @@
 # Author: Lauren Sdun, Julia Jones, Julia Baumgarten
 
 import numpy as np
+import matplotlib.pyplot as plt
 from dataclasses import dataclass
 from typing import Callable, Tuple, Dict, Any, List
 from numpy.linalg import norm
 from scipy.optimize import minimize
 
-from nelder_mead import *
-from newtons_method import * 
 from bruteandgrad import *
+from newtons_method import *
+from nelder_mead import *
+from main import Result, rosen
 
 @dataclass
 class Result:
