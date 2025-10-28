@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.optimize import minimize
-
-from main import Result, rosen
+from common import Result, rosen
 
 def nelder_mead(
     x0: np.ndarray,
