@@ -39,43 +39,38 @@ def rosen_hess(v: np.ndarray) -> np.ndarray:
         [-400*x,                200    ],
     ])
 
+
 # Configuration
+def run_all(corners: List[Tuple[float,float]] = [(-2,-1), (-2,3), (2,-1), (2,3)],
+            gd_lrs=(1e-4, 1e-3, 1e-2),
+            use_backtracking=True,
+            tol=1e-10):
+    results = []
 
-X_RANGE = (-2.0, 2.0)
-Y_RANGE = (-1.0, 3.0)
+    # Brute force single sweep (no path)
+    bf = brute_force()
+    results.append(bf)
 
-def random_starts(n: int, seed: int = 0):
-    rng = np.random.default_rng(seed)
-    xs = rng.uniform(X_RANGE[0], X_RANGE[1], size=n)
-    ys = rng.uniform(Y_RANGE[0], Y_RANGE[1], size=n)
-    return [np.array([x, y]) for x, y in zip(xs, ys)]
+    # Gradient descent (several step sizes) from each corner
+    for x0 in corners:
+        for lr in gd_lrs:
+            r = gradient_descent(x0, lr=lr, max_iter=200000, tol_f=tol, use_backtracking=use_backtracking)
+            results.append(r)
 
-def run_all(n_starts: int = 10, seed: int = 0):
-    starts = random_starts(n_starts, seed)
-    results = {"grid": [grid_search()]}
-    results["gradient_descent"] = []
-    results["newton"] = []
-    results["nelder_mead"] = []
+    # Newton
+    for x0 in corners:
+        r = newton_method(np.array(x0), max_iter=500, tol=tol)
+        results.append(r)
 
-    for x0 in starts:
-        results["gradient_descent"].append(gradient_descent(x0))
-        results["newton"].append(newtons_method(x0))
-        results["nelder_mead"].append(nelder_mead(x0))
+    # Nelder–Mead
+    for x0 in corners:
+        r = nelder_mead(np.array(x0), max_iter=5000, tol=tol)
+        results.append(r)
 
-    # picks best per method
-    bests = []
-    for m, arr in results.items():
-        best = min(arr, key=lambda r: r.f)
-        bests.append(best)
+    # Print report
+    print("\n=== Summary (stop criterion: f(x) < 1e-10) ===")
+    for r in results:
+        print(f"{r.method:28s}  x0={np.array2string(r.x0, precision=2, suppress_small=True)}  "
+              f"iters={r.iters:6d}  f*={r.f: .3e}  x*={np.array2string(r.x, precision=6)}  success={r.success}")
 
-    # prints report
-    print("\n=== Best per method (across starts) ===")
-    for r in bests:
-        print(f"{r.method:16s}  f*={r.f: .6e}  x*={r.x}  iters={r.iters:4d}  success={r.success}  info={r.info}")
-
-    # inspects raw results
-    return results, bests
-
-if __name__ == "__main__":
-    results, bests = run_all(n_starts=12, seed=42)
-
+    return results
