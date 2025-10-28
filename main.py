@@ -24,6 +24,19 @@ def rosen(xy: np.ndarray) -> float:
     x, y = xy
     return (1 - x)**2 + 100.0 * (y - x**2)**2
 
+def rosen_grad(v: np.ndarray) -> np.ndarray:
+    x, y = v
+    dfx = -2*(1 - x) - 400*x*(y - x**2)
+    dfy = 200*(y - x**2)
+    return np.array([dfx, dfy])
+
+def rosen_hess(v: np.ndarray) -> np.ndarray:
+    x, y = v
+    return np.array([
+        [2 - 400*(y - 3*x**2), -400*x],
+        [-400*x,                200    ],
+    ])
+
 # Configuration
 
 X_RANGE = (-2.0, 2.0)
