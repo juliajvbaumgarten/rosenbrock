@@ -2,8 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import rosen
 
-print(f"Brute-force minimum approx: x={x_min_brute:.4f}, y={y_min_brute:.4f}, f={z_min_brute:.6f}")
-
 class Result:
     def __init__(self, method, x0, x, f, iters, success, info):
         self.method = method
