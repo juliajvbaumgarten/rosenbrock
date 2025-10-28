@@ -26,7 +26,7 @@ def run_all(corners: List[Tuple[float,float]] = [(-2,-1), (-2,3), (2,-1), (2,3)]
     # Gradient descent (several step sizes) from each corner
     for x0 in corners:
         for lr in gd_lrs:
-            r = gradient_descent(x0, lr=lr, max_iter=200000, tol_f=tol, use_backtracking=use_backtracking)
+            r = gradient_descent(x0, lr=lr, tol=tol, max_iter=200000)
             results.append(r)
 
     # Newton
