@@ -35,7 +35,30 @@ axes[2].set_title("Nelder–Mead Fit"); axes[2].legend()
 plt.tight_layout(); plt.show()
 
 # look at parameters and compare to true ones
-print("True parameters:       ", true_params)
-print("Newton fit params:     ", fit_newton)
-print("Gradient Descent fit:  ", fit_gd)
-print("Nelder–Mead fit:      ", fit_nm)
+print("True parameters:", true_params)
+print("Newton fit params:", fit_newton)
+print("Gradient Descent fit:", fit_gd)
+print("Nelder–Mead fit:", fit_nm)
+
+# calculating the adjusted R^2 value
+y_newton = gaussian(x, *fit_newton)
+y_gd = gaussian(x, *fit_gd)
+y_nm = gaussian(x, *fit_nm)
+
+def r_squared(y, y_fit):
+    ss_res = np.sum((y - y_fit)**2)
+    ss_tot = np.sum((y - np.mean(y))**2)
+    return 1 - ss_res / ss_tot
+
+def r_squared_adj(y, y_fit, p):
+    n = len(y)
+    r2 = r_squared(y, y_fit)
+    return 1 - (1 - r2) * (n - 1) / (n - p - 1)
+
+p = 4  # number of parameters
+print("Adjusted R^2:")
+print("Newton R^2 adjusted:", r_squared_adj(y, y_newton, p))
+print("Gradient Descent R^2 adj:", r_squared_adj(y, y_gd, p))
+print("Nelder–Mead R^2 adj:", r_squared_adj(y, y_nm, p))
+
+
