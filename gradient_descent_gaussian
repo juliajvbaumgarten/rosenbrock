@@ -1,0 +1,28 @@
+import numpy as np
+from gaussian_model import residuals, jacobian
+
+def gradient_descent_gaussian(x, y, params0, lr=1e-4, tol=1e-8, max_iter=5000):
+    params = np.array(params0, dtype=float)
+    path = [params.copy()]
+
+    for _ in range(max_iter):
+        r = residuals(params, x, y)
+        J = jacobian(params, x)
+        grad = -2 * J.T @ r
+
+        params_new = params - lr * grad
+
+        params_new[0] = max(params_new[0], 1e-6) # A
+        params_new[2] = max(params_new[2], 1e-6) # sigma
+        params_new[1] = np.clip(params_new[1], -10, 10) # mu
+        params_new[3] = np.clip(params_new[3], -5, 5) # C
+
+        if np.linalg.norm(params_new - params) < tol:
+            params = params_new
+            path.append(params.copy())
+            break
+
+        params = params_new
+        path.append(params.copy())
+
+    return params, path
