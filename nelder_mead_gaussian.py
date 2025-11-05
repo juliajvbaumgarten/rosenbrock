@@ -8,6 +8,7 @@ with h5py.File('./data.hdf', 'r') as f:
     xpos = f['data/xpos'][:]
     ypos = f['data/ypos'][:]
 
+
 def gaussian(x, A, mu, sigma, C):
     return A * np.exp(-((x - mu) ** 2) / (2 * sigma ** 2)) + C
 
@@ -24,11 +25,9 @@ sigma0 = (xpos.max() - xpos.min()) / 10
 C0 = np.mean(ypos)
 initial_guess = [A0, mu0, sigma0, C0]
 
-# fit with Nelder-mead
+# fit with Nelder-ead
 result = minimize(loss, initial_guess, method='Nelder-Mead', 
                   options={'maxiter': 2000, 'xatol': 1e-8, 'fatol': 1e-8, 'disp': True})
-
-print("Optimal parameters (A, mu, sigma, C):", result.x)
 
 # plot data and fit
 x_sorted = np.sort(xpos)
@@ -43,3 +42,20 @@ plt.legend()
 plt.title("Gaussian Fit using Nelder–Mead")
 plt.show()
 
+# Calculate R^2
+def r_squared(y_true, y_pred):
+    ss_res = np.sum((y_true - y_pred) ** 2)
+    ss_tot = np.sum((y_true - np.mean(y_true)) ** 2)
+    return 1 - ss_res / ss_tot
+
+def r_squared_adj(y_true, y_pred, p):
+    n = len(y_true)
+    r2 = r_squared(y_true, y_pred)
+    return 1 - (1 - r2) * (n - 1) / (n - p - 1)
+
+y_fit_nm = gaussian(xpos, *result.x)
+r2_nm = r_squared(ypos, y_fit_nm)
+r2_adj_nm = r_squared_adj(ypos, y_fit_nm, p=4) # 4 params
+
+print(f"R^2 (Nelder–Mead): {r2_nm:.6f}")
+print(f"Adjusted R^2 (Nelder–Mead): {r2_adj_nm:.6f}")
