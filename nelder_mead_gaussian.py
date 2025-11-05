@@ -24,7 +24,7 @@ sigma0 = (xpos.max() - xpos.min()) / 10
 C0 = np.mean(ypos)
 initial_guess = [A0, mu0, sigma0, C0]
 
-# fit with Nelder-ead
+# fit with Nelder-mead
 result = minimize(loss, initial_guess, method='Nelder-Mead', 
                   options={'maxiter': 2000, 'xatol': 1e-8, 'fatol': 1e-8, 'disp': True})
 
