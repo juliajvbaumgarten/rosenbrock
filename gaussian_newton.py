@@ -24,7 +24,7 @@ def jacobian(params, x):
     dC = -np.ones_like(x)
     return np.vstack((dA, dmu, dsigma, dC)).T
 
-# Newton's Method
+# Newton's method
 def newton_gaussian_fit(x, y, params0, max_iter=50, tol=1e-8):
     params = np.array(params0, dtype=float)
     for _ in range(max_iter):
@@ -52,6 +52,7 @@ C0 = np.mean(ypos)
 params0 = [A0, mu0, sigma0, C0]
 
 fit_newton = newton_gaussian_fit(xpos, ypos, params0)
+print("Optimal parameters (A, mu, sigma, C):", fit_newton)
 
 # plot fit
 x_sorted = np.sort(xpos)
@@ -65,3 +66,21 @@ plt.ylabel("y")
 plt.legend()
 plt.title("Gaussian Fit using Newton’s Method")
 plt.show()
+
+# calculate R^2
+def r_squared(y_true, y_pred):
+    ss_res = np.sum((y_true - y_pred) ** 2)
+    ss_tot = np.sum((y_true - np.mean(y_true)) ** 2)
+    return 1 - ss_res / ss_tot
+
+def r_squared_adj(y_true, y_pred, p):
+    n = len(y_true)
+    r2 = r_squared(y_true, y_pred)
+    return 1 - (1 - r2) * (n - 1) / (n - p - 1)
+
+y_fit_newton = gaussian(xpos, *fit_newton)
+r2_newton = r_squared(ypos, y_fit_newton)
+r2_adj_newton = r_squared_adj(ypos, y_fit_newton, p=4)  
+
+print(f"R^2 (Newton): {r2_newton:.6f}")
+print(f"Adjusted R^2 (Newton): {r2_adj_newton:.6f}")
