@@ -8,7 +8,6 @@ with h5py.File('./data.hdf', 'r') as f:
     xpos = f['data/xpos'][:]
     ypos = f['data/ypos'][:]
 
-
 def gaussian(x, A, mu, sigma, C):
     return A * np.exp(-((x - mu) ** 2) / (2 * sigma ** 2)) + C
 
