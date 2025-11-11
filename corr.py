@@ -66,7 +66,7 @@ chain_indep = np.random.randn(N)
 
 # 2. Correlated Chain (AR(1) process with phi=0.9)
 # Theoretical ACL = (1 + 0.9) / (1 - 0.9) = 1.9 / 0.1 = 19.0
-PHI = 2
+PHI = 1.5
 THEORY_ACL = (1 + PHI) / (1 - PHI)
 chain_corr = generate_simulated_chain(N, PHI)
 
