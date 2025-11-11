@@ -1,5 +1,6 @@
 import numpy as np
 import emcee
+import emcee.autocorr
 from matplotlib import pyplot as plt
 import h5py
 
@@ -72,3 +73,80 @@ for i in range(100, nsteps+1, 100):
     
     plt.tight_layout()
     plt.show()
+
+# corner plot
+
+import corner
+
+chain = sampler.get_chain(discard=0, thin=1, flat=False)
+flat_chain = chain.reshape(-1, chain.shape[-1])
+
+fig = corner.corner(
+    flat_chain,
+    labels=[r"$A$", r"$\mu$", r"$\sigma$", r"$C$"],
+    show_titles=True,
+    title_fmt=".3f"
+)
+
+plt.show()
+
+# retrieve the samples
+chain = sampler.get_chain(discard=0, thin=1, flat=False)
+
+# using the function from corre.py
+def direct_autocorr(chain, max_lag=None):
+
+    chain = chain[len(chain)//2:] 
+
+    n = len(chain)
+    if max_lag is None:
+        max_lag = n // 10
+
+    y = chain - np.mean(chain)
+    c = np.correlate(y, y, mode='full')
+    c = c[n-1:n-1+max_lag]
+    rho = c / c[0]
+
+    negative_indices = np.where(rho < 0)[0]
+    if len(negative_indices) > 0:
+        cutoff = negative_indices[0]
+    else:
+        cutoff = len(rho)
+
+    tau_estimate = 1.0 + 2.0 * np.sum(rho[1:cutoff])
+
+    return tau
+
+labels = ["A", "mu", "sigma", "C"]
+nsteps, nwalkers, ndim = chain.shape
+
+tau_emcee = np.zeros((nwalkers, ndim))
+tau_direct = np.zeros((nwalkers, ndim))
+
+for w in range(nwalkers):
+    for p in range(ndim):
+        series = chain[:, w, p]
+
+        # emcee method 
+        try:
+            tau = emcee.autocorr.integrated_time(series[len(series)//2:], quiet=True)[0]
+        except:
+            tau = np.nan
+        tau_emcee[w, p] = tau
+
+        # direct method from corr.py
+        tau2 = direct_autocorr(series)
+        tau_direct[w, p] = tau2
+
+print("Median ACL Across Walkers (emcee) =")
+for p in range(ndim):
+    print(f"{labels[p]}: {np.nanmedian(tau_emcee[:,p]):.2f}")
+
+print("\nMedian ACL Across Walkers (direct) =")
+for p in range(ndim):
+    print(f"{labels[p]}: {np.nanmedian(tau_direct[:,p]):.2f}")
+
+# calculating variance within the chain
+print("\nvariance across the walkers =")
+for p in range(ndim):
+    print(f"{labels[p]}: std(emcee) = {np.nanstd(tau_emcee[:,p]):.2f}, std(direct) = {np.nanstd(tau_direct[:,p]):.2f}")
